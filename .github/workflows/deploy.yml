@@ -28,3 +28,13 @@ jobs:
         run: |
           docker build -t ${ACR_REGISTRY}/react-app:${{ github.sha }} .
           docker push ${ACR_REGISTRY}/react-app:${{ github.sha }}
+
+      - name: Set up Kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ env.KUBECONFIG_FILE }}" > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Restart portal deployment
+        run: |
+          kubectl rollout restart deployment datagov-mdm
