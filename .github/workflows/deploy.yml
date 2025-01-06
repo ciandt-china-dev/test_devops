@@ -2,7 +2,7 @@ name: Deploy to Kubernetes
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
 
 env:
   ACR_REGISTRY: ${{ secrets.ACR_REGISTRY }}
