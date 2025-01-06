@@ -1,0 +1,24 @@
+name: Sync from Bitbucket
+
+on:
+  push:
+    branches:
+      - master  # 触发同步的分支名称
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v2
+      with:
+        repository: ciandt_it/devops-test
+        token: ${{ secrets.BITBUCKET_TOKEN }}
+
+    - name: Sync to GitHub
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      run: |
+        git remote add github <https://x-access-token>:${{ secrets.GH_TOKEN }}@github.com/ciandt-china-dev/test_devops.git
+        git push github master --force
