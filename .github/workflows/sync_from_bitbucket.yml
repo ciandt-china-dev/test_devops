@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout the repository
+    - name: Checkout the repository 1
       uses: actions/checkout@v2
       with:
         repository: https://bitbucket.org/ciandt_it/devops-test
