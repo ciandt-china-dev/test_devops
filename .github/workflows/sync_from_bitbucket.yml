@@ -1,9 +1,11 @@
-name: Sync from Bitbucket 1
+name: Sync from Bitbucket
 
 on:
   push:
     branches:
-      - master  # 触发同步的分支名称
+      - master
+  repository_dispatch:
+    types: [bitbucket_push]
 
 jobs:
   sync:
