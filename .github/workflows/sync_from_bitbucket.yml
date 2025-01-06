@@ -15,7 +15,7 @@ jobs:
     - name: Checkout the repository
       uses: actions/checkout@v2
       with:
-        repository: ciandt_it/devops-test
+        repository: https://bitbucket.org/ciandt_it/devops-test
         token: ${{ secrets.BITBUCKET_TOKEN }}
 
     - name: Sync to GitHub
