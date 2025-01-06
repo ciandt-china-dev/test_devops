@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-  workflow_dispatch:
   repository_dispatch:
     types: [bitbucket_push]
 
@@ -13,15 +12,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout the repository 1
-      uses: actions/checkout@v2
-      with:
-        repository: https://bitbucket.org/ciandt_it/devops-test
-        token: ${{ secrets.BITBUCKET_TOKEN }}
+    - name: Clone from Bitbucket
+      run: |
+        git clone https://x-token-auth:${BITBUCKET_TOKEN}@bitbucket.org/ciandt_it/devops-test.git .
+      env:
+        BITBUCKET_TOKEN: ${{ secrets.BITBUCKET_TOKEN }}
 
     - name: Sync to GitHub
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
       run: |
-        git remote add github <https://x-access-token>:${{ secrets.GH_TOKEN }}@github.com/ciandt-china-dev/test_devops.git
+        git remote add github https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/ciandt-china-dev/test_devops.git
         git push github master --force
