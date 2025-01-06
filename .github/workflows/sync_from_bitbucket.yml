@@ -1,4 +1,4 @@
-name: Sync from Bitbucket
+name: Sync from Bitbucket 1
 
 on:
   push:
