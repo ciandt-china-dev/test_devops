@@ -14,7 +14,7 @@ jobs:
     steps:
     - name: Clone from Bitbucket
       run: |
-        git clone https://x-token-auth:${BITBUCKET_TOKEN}@bitbucket.org/ciandt_it/devops-test.git .
+        git clone https://x-token-auth:${{ secrets.BITBUCKET_TOKEN }}@bitbucket.org/ciandt_it/devops-test.git .
       env:
         BITBUCKET_TOKEN: ${{ secrets.BITBUCKET_TOKEN }}
 
