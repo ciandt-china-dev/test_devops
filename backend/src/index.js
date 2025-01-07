@@ -100,7 +100,7 @@ app.post('/api/trigger-github/:owner/:repo/:token', handleTriggerRequest);
 
 // 健康检查端点
 app.get('/health', (req, res) => {
-  console.log(`[${new Date().toISOString()}] 健康检查请求`);
+  console.log(`[${new Date().toISOString()}] 健康检查请求...`);
   res.status(200).json({ status: 'ok' });
 });
 
