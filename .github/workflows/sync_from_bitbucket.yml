@@ -1,9 +1,6 @@
 name: Sync from Bitbucket
 
 on:
-  push:
-    branches:
-      - master
   repository_dispatch:
     types: [bitbucket_push]
 
