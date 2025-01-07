@@ -62,11 +62,12 @@ async function triggerGithubDispatch(owner, repo, token) {
   }
 }
 
-// API端点
-app.get('/api/trigger-github/:owner/:repo/:token', async (req, res) => {
+// 处理GitHub触发请求的函数
+async function handleTriggerRequest(req, res) {
   const { owner, repo, token } = req.params;
+  const method = req.method;
   
-  console.log(`[${new Date().toISOString()}] 收到新的触发请求`);
+  console.log(`[${new Date().toISOString()}] 收到新的触发请求 [${method}]`);
   console.log(`[${new Date().toISOString()}] 请求参数: owner=${owner}, repo=${repo}`);
   
   if (!owner || !repo || !token) {
@@ -91,7 +92,11 @@ app.get('/api/trigger-github/:owner/:repo/:token', async (req, res) => {
       details: result.details
     });
   }
-});
+}
+
+// API端点 - 支持GET和POST
+app.get('/api/trigger-github/:owner/:repo/:token', handleTriggerRequest);
+app.post('/api/trigger-github/:owner/:repo/:token', handleTriggerRequest);
 
 // 健康检查端点
 app.get('/health', (req, res) => {
