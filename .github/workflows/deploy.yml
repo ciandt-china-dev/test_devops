@@ -35,6 +35,6 @@ jobs:
           echo "${{ env.KUBECONFIG_FILE }}" > $HOME/.kube/config
           chmod 600 $HOME/.kube/config
 
-      - name: Restart portal deployment
+      - name: Restart webhook-api deployment
         run: |
-          kubectl rollout restart deployment datagov-mdm
+          kubectl rollout restart deployment webhook-api
