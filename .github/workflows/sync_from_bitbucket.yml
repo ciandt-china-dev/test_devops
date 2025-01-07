@@ -14,9 +14,10 @@ jobs:
     steps:
     - name: Clone from Bitbucket
       run: |
-        git clone https://x-token-auth:${{ secrets.BITBUCKET_TOKEN }}@bitbucket.org/ciandt_it/devops-test.git .
+        git clone https://${{ secrets.BITBUCKET_USERNAME }}:${{ secrets.BITBUCKET_TOKEN }}@bitbucket.org/ciandt_it/devops-test.git .
       env:
         BITBUCKET_TOKEN: ${{ secrets.BITBUCKET_TOKEN }}
+        BITBUCKET_USERNAME: ${{ secrets.BITBUCKET_USERNAME }}
 
     - name: Sync to GitHub
       env:
