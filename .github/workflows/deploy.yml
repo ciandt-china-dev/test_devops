@@ -47,7 +47,7 @@ jobs:
 
   deploy-backend:
     needs: prepare
-    if: contains(fromJSON(needs.prepare.outputs.services), 'api')
+    if: contains(fromJSON(needs.prepare.outputs.services), 'backend')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
