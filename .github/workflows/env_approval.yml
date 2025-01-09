@@ -49,8 +49,8 @@ jobs:
           if [ ${#SERVICES[@]} -eq 0 ]; then
             echo "services=[]" >> $GITHUB_OUTPUT
           else
-            JSON_ARRAY=$(printf '%s\n' "${SERVICES[@]}" | jq -R . | jq -s .)
-            echo "services=$JSON_ARRAY" >> $GITHUB_OUTPUT
+            JSON_ARRAY=$(printf '%s\n' "${SERVICES[@]}" | jq -R . | jq -s . | jq -c .)
+            echo "services=${JSON_ARRAY}" >> $GITHUB_OUTPUT
           fi
 
   deployment-approval:
