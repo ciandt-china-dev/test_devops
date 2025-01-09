@@ -86,17 +86,27 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const services = ${{ needs.detect-changes.outputs.affected_services || '[]' }};
-            console.log('Detected services:', services);
+            // 获取检测到的服务
+            const detectedServices = ${{ needs.detect-changes.outputs.affected_services || '[]' }};
+            console.log('Detected services:', detectedServices);
             
-            if (services.length === 0 && '${{ github.event_name }}' === 'push') {
+            // 处理手动触发的情况
+            const isManualTrigger = '${{ github.event_name }}' === 'workflow_dispatch';
+            const manualSelection = '${{ github.event.inputs.services }}';
+            
+            let selectedServices;
+            if (isManualTrigger) {
+              // 如果是手动触发
+              selectedServices = manualSelection === 'all' ? detectedServices : [manualSelection];
+            } else {
+              // 如果是自动触发（push 事件）
+              selectedServices = detectedServices;
+            }
+            
+            if (selectedServices.length === 0 && '${{ github.event_name }}' === 'push') {
               core.setFailed('No service changes detected');
               return;
             }
-            
-            const selectedServices = '${{ github.event.inputs.services }}' === 'all' 
-              ? services 
-              : ['${{ github.event.inputs.services }}'];
             
             console.log('Selected services for deployment:', selectedServices);
             core.setOutput('selected_services', JSON.stringify(selectedServices));
