@@ -23,13 +23,13 @@ jobs:
           -u "haleon" \
           -p "${ACR_PASSWORD}"
 
-      - name: Push Docker image
-        run: |
-          docker push ${ACR_REGISTRY}/react-app:latest
-
       - name: Build Docker image
         run: |
           docker build -t ${ACR_REGISTRY}/react-app:latest .
+
+      - name: Push Docker image
+        run: |
+          docker push ${ACR_REGISTRY}/react-app:latest
 
   deploy:
     needs: build
