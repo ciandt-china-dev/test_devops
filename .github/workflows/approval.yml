@@ -16,13 +16,19 @@ permissions:
 
 jobs:
   approval:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - name: Debug Event
         run: |
           echo "Event name: ${{ github.event_name }}"
           echo "Ref: ${{ github.ref }}"
           echo "SHA: ${{ github.sha }}"
+          echo "Runner OS: ${{ runner.os }}"
+          echo "Runner Name: ${{ runner.name }}"
 
       - name: Create Deployment Issue
         if: github.event_name == 'push' || github.event_name == 'pull_request'
@@ -76,6 +82,7 @@ jobs:
     needs: approval
     if: github.event_name == 'issue_comment' && contains(github.event.comment.body, 'confirm')
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Close Approval Issue
         uses: actions/github-script@v6
