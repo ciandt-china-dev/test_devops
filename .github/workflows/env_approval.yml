@@ -1,0 +1,41 @@
+name: Environment Deployment Approval
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+
+permissions:
+  contents: read
+  deployments: write
+  actions: write
+
+jobs:
+  deployment-approval:
+    runs-on: ubuntu-latest
+    environment: production-approval
+    timeout-minutes: 300
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    
+    steps:
+      - name: Debug Event Info
+        run: |
+          echo "Event name: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "SHA: ${{ github.sha }}"
+          echo "Actor: ${{ github.actor }}"
+
+      - name: Trigger Deploy Workflow
+        if: success()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.WORKFLOW_PAT }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy.yml',
+              ref: 'master'
+            }) 
