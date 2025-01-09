@@ -99,7 +99,8 @@ jobs:
       - name: Trigger Deploy Workflow
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # 使用具有更高权限的 PAT
+          github-token: ${{ secrets.WORKFLOW_PAT }}
           script: |
             await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
