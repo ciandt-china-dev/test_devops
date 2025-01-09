@@ -17,7 +17,6 @@ permissions:
 jobs:
   approval:
     if: |
-      github.event_name == 'issue_comment' && contains(github.event.comment.body, 'confirm') ||
       github.event_name == 'push' ||
       github.event_name == 'pull_request'
     runs-on: ubuntu-latest
