@@ -4,7 +4,8 @@ on:
   workflow_dispatch:
 
 env:
-  ACR_REGISTRY: haleon.azurecr.cn
+  ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+  ACR_REGISTRY: ${{ secrets.ACR_REGISTRY }}
   ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
   KUBECONFIG_FILE: ${{ secrets.KUBECONFIG }}
 
@@ -20,7 +21,7 @@ jobs:
       - name: Login to Container Registry
         run: |
           docker login ${ACR_REGISTRY} \
-          -u "haleon" \
+          -u "${ACR_USERNAME}" \
           -p "${ACR_PASSWORD}"
 
       - name: Build Docker image
