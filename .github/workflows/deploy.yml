@@ -1,7 +1,12 @@
-name: Deploy
+name: Deploy Services
 
 on:
   workflow_dispatch:
+    inputs:
+      services:
+        description: '要部署的服务列表（JSON 格式）'
+        required: true
+        type: string
 
 env:
   ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
@@ -9,11 +14,43 @@ env:
   ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
   KUBECONFIG_FILE: ${{ secrets.KUBECONFIG }}
 
+permissions:
+  contents: read
+  deployments: write
+
 jobs:
-  build:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.parse-services.outputs.services }}
+    steps:
+      - name: Parse Services
+        id: parse-services
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const services = JSON.parse(context.payload.inputs.services);
+            core.setOutput('services', JSON.stringify(services));
+            console.log(`将部署以下服务: ${services.join(', ')}`);
+
+  deploy-frontend:
+    needs: prepare
+    if: contains(fromJSON(needs.prepare.outputs.services), 'frontend')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      
+      - name: Deploy Frontend
+        run: |
+          echo "开始部署前端服务..."
+          # 这里添加前端部署步骤
+
+  deploy-backend:
+    needs: prepare
+    if: contains(fromJSON(needs.prepare.outputs.services), 'api')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -32,16 +69,23 @@ jobs:
         run: |
           docker push ${ACR_REGISTRY}/react-app:latest
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
       - name: Set up Kubeconfig
         run: |
           mkdir -p $HOME/.kube
           echo "${{ env.KUBECONFIG_FILE }}" > $HOME/.kube/config
           chmod 600 $HOME/.kube/config
 
-      - name: Restart webhook-api deployment
+      - name: Deploy to Kubernetes
         run: |
           kubectl rollout restart deployment webhook-api
+
+  notify:
+    needs: [prepare, deploy-frontend, deploy-backend]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deployment Status
+        run: |
+          echo "部署完成状态："
+          echo "Frontend: ${{ needs.deploy-frontend.result }}"
+          echo "Backend: ${{ needs.deploy-backend.result }}"
