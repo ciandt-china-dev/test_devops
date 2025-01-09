@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 
 // 触发GitHub repository dispatch事件的函数
 async function triggerGithubDispatch(owner, repo, token) {
-  console.log(`[${new Date().toISOString()}] 开始触发GitHub Dispatch事件`);
+  console.log(`[${new Date().toISOString()}] 开始触发GitHub Dispatch事件.`);
   console.log(`[${new Date().toISOString()}] 目标仓库: ${owner}/${repo}`);
   
   try {
