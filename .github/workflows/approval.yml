@@ -11,15 +11,13 @@ on:
 jobs:
   approval:
     if: |
-      (github.event_name == 'issue_comment' &&
-      github.event.issue.pull_request &&
-      contains(github.event.comment.body, 'confirm')) ||
+      github.event_name == 'issue_comment' && contains(github.event.comment.body, 'confirm') ||
       github.event_name == 'push' ||
       github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Create Deployment Issue
-        if: github.event_name != 'issue_comment'
+        if: github.event_name == 'push' || github.event_name == 'pull_request'
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -33,6 +31,8 @@ jobs:
               
               - Commit: ${context.sha}
               - Triggered by: @${context.actor}
+              - Branch: ${context.ref}
+              - Event: ${context.eventName}
               
               To approve this deployment, a maintainer must comment with \`confirm\`
               `
