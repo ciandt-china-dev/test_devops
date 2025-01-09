@@ -8,6 +8,12 @@ on:
   issue_comment:
     types: [created]
 
+# 添加权限配置
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 jobs:
   approval:
     if: |
@@ -16,28 +22,39 @@ jobs:
       github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
+      - name: Debug Event
+        run: |
+          echo "Event name: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "SHA: ${{ github.sha }}"
+
       - name: Create Deployment Issue
         if: github.event_name == 'push' || github.event_name == 'pull_request'
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const issue = await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: '🚀 Deployment Approval Required',
-              body: `
-              ### Deployment Approval Request
-              
-              - Commit: ${context.sha}
-              - Triggered by: @${context.actor}
-              - Branch: ${context.ref}
-              - Event: ${context.eventName}
-              
-              To approve this deployment, a maintainer must comment with \`confirm\`
-              `
-            });
-            console.log(`Created approval issue #${issue.data.number}`);
+            try {
+              const issue = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: '🚀 Deployment Approval Required',
+                body: `
+                ### Deployment Approval Request
+                
+                - Commit: ${context.sha}
+                - Triggered by: @${context.actor}
+                - Branch: ${context.ref}
+                - Event: ${context.eventName}
+                
+                To approve this deployment, a maintainer must comment with \`confirm\`
+                `
+              });
+              console.log('Successfully created issue:', issue.data.html_url);
+            } catch (error) {
+              console.error('Error creating issue:', error);
+              core.setFailed(error.message);
+            }
 
       - name: Check Approver Permission
         if: github.event_name == 'issue_comment'
