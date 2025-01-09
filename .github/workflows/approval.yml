@@ -5,22 +5,77 @@ on:
     branches: [ master ]
   push:
     branches: [ master ]
+  issue_comment:
+    types: [created]
 
 jobs:
   approval:
+    if: |
+      (github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, 'confirm')) ||
+      github.event_name == 'push' ||
+      github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    environment:
-      name: production-approval
-      url: https://github.com/${{ github.repository }}/actions/workflows/deploy.yml
     steps:
-      - name: Approval Check
-        run: |
-          echo "Deployment has been approved!"
+      - name: Create Deployment Issue
+        if: github.event_name != 'issue_comment'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚀 Deployment Approval Required',
+              body: `
+              ### Deployment Approval Request
+              
+              - Commit: ${context.sha}
+              - Triggered by: @${context.actor}
+              
+              To approve this deployment, a maintainer must comment with \`confirm\`
+              `
+            });
+            console.log(`Created approval issue #${issue.data.number}`);
+
+      - name: Check Approver Permission
+        if: github.event_name == 'issue_comment'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const author = context.payload.comment.user.login;
+            const repo = context.payload.repository.name;
+            const owner = context.payload.repository.owner.login;
+            
+            const { data: permission } = await github.rest.repos.getCollaboratorPermissionLevel({
+              owner,
+              repo,
+              username: author
+            });
+            
+            if (!['admin', 'write'].includes(permission.permission)) {
+              throw new Error('Only repository maintainers can approve deployments');
+            }
 
   trigger-deploy:
     needs: approval
+    if: github.event_name == 'issue_comment' && contains(github.event.comment.body, 'confirm')
     runs-on: ubuntu-latest
     steps:
+      - name: Close Approval Issue
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              state: 'closed'
+            });
+
       - name: Trigger Deploy Workflow
         uses: actions/github-script@v6
         with:
