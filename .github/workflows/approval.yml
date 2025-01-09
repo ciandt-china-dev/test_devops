@@ -19,7 +19,7 @@ jobs:
     if: |
       github.event_name == 'push' ||
       github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Debug Event
         run: |
@@ -78,7 +78,7 @@ jobs:
   trigger-deploy:
     needs: approval
     if: github.event_name == 'issue_comment' && contains(github.event.comment.body, 'confirm')
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Close Approval Issue
         uses: actions/github-script@v6
